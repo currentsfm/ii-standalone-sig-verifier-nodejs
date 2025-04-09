@@ -1,0 +1,17 @@
+{
+  "name": "@dfinity/standalone-sig-verifier-web",
+  "description": "Standalone crypto library to verify cryptographic signatures for the Internet Computer",
+  "version": "1.0.0",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dfinity/standalone-sig-verifier-web"
+  },
+  "files": [
+    "standalone_sig_verifier_web_bg.wasm",
+    "standalone_sig_verifier_web.js",
+    "standalone_sig_verifier_web.d.ts"
+  ],
+  "main": "standalone_sig_verifier_web.js",
+  "types": "standalone_sig_verifier_web.d.ts"
+}
