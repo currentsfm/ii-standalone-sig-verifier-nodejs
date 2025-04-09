@@ -39,7 +39,7 @@ jobs:
         run: cargo install wasm-pack --locked
 
       - name: Build
-        run: wasm-pack build --target nodejs --out-dir dist --release
+        run: wasm-pack build --target nodejs --out-dir dist --release --scope dfinity
 
       - name: Move dist folder outside of git repo temporarily
         run: |
