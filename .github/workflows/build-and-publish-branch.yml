@@ -80,6 +80,7 @@ jobs:
 
       - name: Commit and Push Changes
         run: |
+          rm -rf ./target
           git add .
           git commit -m "Update pkg branch with latest build"
           git push origin pkg
