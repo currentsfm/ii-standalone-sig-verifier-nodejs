@@ -1,0 +1,75 @@
+name: Build and Publish to Branch
+
+on:
+  # You can change the trigger as needed
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'pkg/**'  # Avoid recursive triggers when updating the pkg branch
+
+jobs:
+  build_and_publish:
+    name: Build and Publish to pkg Branch
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust: [ 1.73.0 ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Rust
+        run: |
+          rustup update ${{ matrix.rust }} --no-self-update
+          rustup default ${{ matrix.rust }}
+          rustup component add rustfmt
+          rustup component add clippy
+
+      - name: Install wasm-pack
+        run: cargo install wasm-pack
+
+      - name: Build
+        run: wasm-pack build --target nodejs --out-dir dist --release
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+
+      - name: Create and Switch to pkg Branch
+        run: |
+          # Fetch and check if pkg branch exists
+          if git fetch origin pkg && git branch -a | grep -q "remotes/origin/pkg"; then
+            git checkout pkg
+            # Clean the directory except for .git to avoid conflicts
+            find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} \;
+          else
+            # Create new orphan branch if it doesn't exist
+            git checkout --orphan pkg
+            git rm -rf .
+          fi
+
+      - name: Copy Build Files to Root
+        run: |
+          # Copy all files from dist directory to the root of pkg branch
+          cp -r ../dist/* .
+          # Create a README for the pkg branch
+          echo "# standalone-sig-verifier-web (pkg branch)" > README.md
+          echo "This branch contains the build output for importing into other projects." >> README.md
+          echo "Built with \`wasm-pack build --target nodejs --out-dir dist --release\`" >> README.md
+
+      - name: Commit and Push Changes
+        run: |
+          git add .
+          git commit -m "Update pkg branch with latest build"
+          git push origin pkg
