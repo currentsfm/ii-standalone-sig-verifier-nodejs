@@ -41,6 +41,12 @@ jobs:
       - name: Build
         run: wasm-pack build --target nodejs --out-dir dist --release
 
+      - name: Move dist folder outside of git repo temporarily
+        run: |
+          mkdir -p /tmp/dist-backup
+          cp -r dist/* /tmp/dist-backup/
+          ls -la /tmp/dist-backup/
+
       - name: Configure Git
         run: |
           git config --global user.name 'GitHub Actions'
@@ -61,12 +67,16 @@ jobs:
 
       - name: Copy Build Files to Root
         run: |
-          # Copy all files from dist directory to the root of pkg branch
-          cp -r ../dist/* .
+          # Copy all files from the temporary dist directory to the root of pkg branch
+          cp -r /tmp/dist-backup/* .
           # Create a README for the pkg branch
           echo "# standalone-sig-verifier-web (pkg branch)" > README.md
           echo "This branch contains the build output for importing into other projects." >> README.md
           echo "Built with \`wasm-pack build --target nodejs --out-dir dist --release\`" >> README.md
+          
+          # List files to verify
+          echo "Contents of pkg branch:"
+          ls -la
 
       - name: Commit and Push Changes
         run: |
