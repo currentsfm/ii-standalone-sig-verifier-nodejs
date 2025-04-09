@@ -36,7 +36,7 @@ jobs:
           rustup component add clippy
 
       - name: Install wasm-pack
-        run: cargo install wasm-pack
+        run: cargo install wasm-pack --locked
 
       - name: Build
         run: wasm-pack build --target nodejs --out-dir dist --release
